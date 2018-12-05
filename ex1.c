@@ -55,14 +55,20 @@ double myRandom()
 ///////////////////////////////////////////////
 void updatePositions() {
     for (int i = 0; i < particle_count; i++) {
-        if (particles[i].py > 0 && particles[i].py < particles[i].scale) {
+        if (particles[i].py > 0 && particles[i].py < particles[i].scale
+                && particles[i].pz < 300 && particles[i].px < 300
+                && particles[i].pz > -300 && particles[i].px > -300
+                && !(particles[i].pz > 100 && particles[i].px < -100)) {
             particles[i].dx *= 0.95;
             particles[i].dy *= -0.95;
             particles[i].dz *= 0.95;
             if (particles[i].dx < 0.005 && particles[i].dy < 0.005 && particles[i].dz < 0.005) {
                 particles[i].speed = 0;
             }
-        } else if (particles[i].py <= 0) {
+        } else if (particles[i].py <= 0 && particles[i].py < particles[i].scale
+                && particles[i].pz < 300 && particles[i].px < 300
+                && particles[i].pz > -300 && particles[i].px > -300
+                && !(particles[i].pz > 100 && particles[i].px < -100)) {
             particles[i].py = 0;
             particles[i].dy *= -0.7;
         }
@@ -89,11 +95,27 @@ void drawParticle(void) {
 
 void cleanParticles() {
     for (int i = 0; i < particle_count; i++) {
-        if (particles[i].age > 200) {
+        if (particles[i].age > 600 || particles[i].speed == 0) {
             particles[i] = particles[particle_count - 1];
             particle_count -= 1;
         }
     }
+}
+
+void drawGround() {
+	glColor3f(0.7, 0.7, 0.7);
+	glBegin(GL_QUADS);
+	glVertex3f(-300.0, 0.0, -300.0);
+	glVertex3f(-300.0, 0.0, 100.0);
+	glVertex3f(300.0, 0.0, 100.0);
+	glVertex3f(300.0, 0.0, -300.0);
+	glEnd();
+	glBegin(GL_QUADS);
+	glVertex3f(300.0, 0.0, 300.0);
+	glVertex3f(-100.0, 0.0, 300.0);
+	glVertex3f(-100.0, 0.0, 100.0);
+	glVertex3f(300.0, 0.0, 100.0);
+	glEnd();
 }
 
 void display() {
@@ -103,10 +125,16 @@ void display() {
                 0.0, 0.0, 0.0,
                 0.0, 1.0, 0.0);
     // Clear the screen
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // If enabled, draw coordinate axis
+    if (rotY < 0) {
+        drawParticle();
+        drawGround();
+    } else {
+        drawGround();
+        drawParticle();
+    }
     if(axisEnabled) glCallList(axisList);
-    drawParticle();
 
     cleanParticles();
 
@@ -120,6 +148,10 @@ void keyboard(unsigned char key, int x, int y) {
     switch (key) {
         case 27:  /* Escape key */
             exit(0);
+            break;
+        case 'a':
+            if (axisEnabled) axisEnabled = 0;
+            else axisEnabled = 1;
             break;
         case 'X':
           rotX -= 100.0;
@@ -154,7 +186,7 @@ void keyboard(unsigned char key, int x, int y) {
 
           particles[particle_count].speed = 5;
           particles[particle_count].scale = 0.5;
-          particles[particle_count].age = 0;
+          particles[particle_count].age = 50 * myRandom();
           if (color_mode) {
               particles[particle_count].r = myRandom();
               particles[particle_count].g = myRandom();
@@ -180,7 +212,7 @@ void keyboard(unsigned char key, int x, int y) {
 
               particles[i].speed = 5;
               particles[i].scale = 0.5;
-              particles[i].age = 0;
+              particles[i].age = 50 * myRandom();
               if (color_mode) {
                   particles[i].r = myRandom();
                   particles[i].g = myRandom();
@@ -238,6 +270,7 @@ void initParticles() {
 
         particles[i].speed = 5;
         particles[i].scale = 0.5;
+        particles[i].age = 50 * myRandom();
         if (color_mode) {
             particles[i].r = myRandom();
             particles[i].g = myRandom();
@@ -252,13 +285,14 @@ void initGraphics(int argc, char *argv[])
   glutInit(&argc, argv);
   glutInitWindowSize(800, 600);
   glutInitWindowPosition(100, 100);
-  glutInitDisplayMode(GLUT_DOUBLE);
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH);
   glutCreateWindow("COMP37111 Particles");
   glutDisplayFunc(display);
   glutKeyboardFunc(keyboard);
   glutReshapeFunc(reshape);
   makeAxes();
   initParticles();
+  glEnable(GL_DEPTH_TEST);
 }
 
 /////////////////////////////////////////////////
