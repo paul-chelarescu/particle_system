@@ -111,7 +111,8 @@ void drawParticle(void) {
 
 void cleanParticles() {
     for (int i = 0; i < particle_count; i++) {
-        if (particles[i].age > 600 || (particles[i].speed == 0 && particles[i].scale < 5)) {
+        if (particles[i].age > 600 || (particles[i].speed == 0 && particles[i].scale < 5)
+                || particles[i].py < - 1000) {
             particles[i] = particles[particle_count - 1];
             particle_count -= 1;
         }
