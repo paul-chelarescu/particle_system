@@ -181,7 +181,7 @@ void display() {
             xCoord += cos(3 * hover_speed);
             zCoord += sin(3 * hover_speed);
             gluLookAt(rotX * xCoord, 100.0 + rotY, rotZ * zCoord,
-                        0.0, 0.0, 0.0,
+                        0.0, 100.0, 0.0,
                         0.0, 1.0, 0.0);
 
             break;
