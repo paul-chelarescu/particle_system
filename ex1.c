@@ -36,6 +36,7 @@ int particle_count = 3000;
 int start_particle_count = 3000;
 int sources_count = 3;
 int color_mode = 1;
+int mute = 1;
 
 typedef struct {
 	double px, py, pz;
@@ -74,6 +75,7 @@ void updatePositions() {
                 && !(particles[i].pz > 100 && particles[i].px < -100)) {
             particles[i].py = 0;
             particles[i].dy *= -0.7;
+            if (!mute) system("aplay sound.wav&"); // from http://soundbible.com/1742-Anvil-Impact-1x.html
         }
         if (abs(particles[i].py) > particles[i].scale) particles[i].dy -= 0.05;
 
@@ -248,6 +250,9 @@ void keyboard(unsigned char key, int x, int y) {
         case 'c':
           if (color_mode == 1) color_mode = 0;
           else color_mode = 1;
+          break;
+        case 'm':
+          mute = !mute;
           break;
         case 'w':
           start_particle_count += 1000;
