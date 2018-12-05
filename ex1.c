@@ -20,6 +20,7 @@
 
 #define TIME_STEP 0.3
 #define NUM_PARTICLES 10000000
+#define DEG_TO_RAD 0.017453293
 
 // Display list for coordinate axis 
 GLuint axisList;
@@ -32,6 +33,7 @@ float date;
 float gravity = -9.8;
 double spray_factor = 0.7;
 int particle_count = 3000;
+int sources_count = 3;
 int color_mode = 1;
 
 typedef struct {
@@ -81,9 +83,10 @@ void updatePositions() {
 
 
         if (particles[i].scale >= 5) {
-          particles[i].px = 50.0 * sin(date / 2);
-          particles[i].py = 10.0 + 100;
-          particles[i].pz = 50.0 * cos(date / 2);
+            double current_position = 360.0 / sources_count * ((double) particles[i].scale / 5);
+            particles[i].px = 50.0 * sin(date / 2 + current_position * DEG_TO_RAD);
+            particles[i].py = 10.0 + 100;
+            particles[i].pz = 50.0 * cos(date / 2 + current_position * DEG_TO_RAD);
         }
 
         particles[i].age += 1;
@@ -161,6 +164,34 @@ void keyboard(unsigned char key, int x, int y) {
             if (axisEnabled) axisEnabled = 0;
             else axisEnabled = 1;
             break;
+        case 's':
+            sources_count += 1;
+            particles[particle_count].px = 50.0 * sin((date / 2) +  DEG_TO_RAD);
+            particles[particle_count].py = 10.0 + 100;
+            particles[particle_count].pz = 50.0 * cos((date / 2) +  DEG_TO_RAD);
+            particles[particle_count].speed = 0;
+            particles[particle_count].scale = 5 * sources_count;
+            particles[particle_count].age = 300;
+            particles[particle_count].r = 0;
+            particles[particle_count].g = 0;
+            particles[particle_count].b = 0;
+
+            particle_count += 1;
+            break;
+        case 'S':
+            sources_count -= 1;
+            particles[particle_count].px = 50.0 * sin((date / 2) +  DEG_TO_RAD);
+            particles[particle_count].py = 10.0 + 100;
+            particles[particle_count].pz = 50.0 * cos((date / 2) +  DEG_TO_RAD);
+            particles[particle_count].speed = 0;
+            particles[particle_count].scale = 0;
+            particles[particle_count].age = 300;
+            particles[particle_count].r = 0;
+            particles[particle_count].g = 0;
+            particles[particle_count].b = 0;
+
+            particle_count -= 1;
+            break;
         case 'X':
           rotX -= 100.0;
           break;
@@ -184,35 +215,38 @@ void keyboard(unsigned char key, int x, int y) {
           else color_mode = 1;
           break;
         case 'p':
-          particles[particle_count].px = 50.0 * sin(date / 2);
-          particles[particle_count].py = 10.0 + 100;
-          particles[particle_count].pz = 50.0 * cos(date / 2);
-          // Direction
-          particles[particle_count].dx = /*(myRandom() - 0.5) */ spray_factor * sin(date / 2);
-          particles[particle_count].dy = myRandom() * 1.5;
-          particles[particle_count].dz = /*(myRandom() - 0.5) */ spray_factor * cos(date / 2);
+          for (int a = 1; a <= sources_count; a++) {
+            double current_position = 360.0 / (double) sources_count * a;
+            particles[particle_count].px = 50.0 * sin((date / 2) + current_position * DEG_TO_RAD);
+            particles[particle_count].py = 10.0 + 100;
+            particles[particle_count].pz = 50.0 * cos((date / 2) + current_position * DEG_TO_RAD);
+            // Direction
+            particles[particle_count].dx = /*(myRandom() - 0.5) */ spray_factor * sin(date / 2 + current_position * DEG_TO_RAD);
+            particles[particle_count].dy = myRandom() * 1.5;
+            particles[particle_count].dz = /*(myRandom() - 0.5) */ spray_factor * cos(date / 2 + current_position * DEG_TO_RAD);
 
-          particles[particle_count].speed = 5;
-          particles[particle_count].scale = 0.5;
-          particles[particle_count].age = 50 * myRandom();
-          if (color_mode) {
-              particles[particle_count].r = myRandom();
-              particles[particle_count].g = myRandom();
-              particles[particle_count].b = myRandom();
+            particles[particle_count].speed = 5;
+            particles[particle_count].scale = 0.5;
+            particles[particle_count].age = 50 * myRandom();
+            if (color_mode) {
+                particles[particle_count].r = myRandom();
+                particles[particle_count].g = myRandom();
+                particles[particle_count].b = myRandom();
+            }
+            particle_count += 1;
+
+            particles[particle_count].px = 50.0 * sin((date / 2) + current_position * DEG_TO_RAD);
+            particles[particle_count].py = 10.0 + 100;
+            particles[particle_count].pz = 50.0 * cos((date / 2) + current_position * DEG_TO_RAD);
+            particles[particle_count].speed = 0;
+            particles[particle_count].scale = 5 * a;
+            particles[particle_count].age = 300;
+            particles[particle_count].r = 0;
+            particles[particle_count].g = 0;
+            particles[particle_count].b = 0;
+
+            particle_count += 1;
           }
-          particle_count += 1;
-
-          particles[particle_count].px = 50.0 * sin(date / 2);
-          particles[particle_count].py = 10.0 + 100;
-          particles[particle_count].pz = 50.0 * cos(date / 2);
-          particles[particle_count].speed = 0;
-          particles[particle_count].scale = 5;
-          particles[particle_count].age = 570;
-          particles[particle_count].r = 0;
-          particles[particle_count].g = 0;
-          particles[particle_count].b = 0;
-
-          particle_count += 1;
           break;
         case ' ':
           date = 0.0;
