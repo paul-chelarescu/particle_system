@@ -26,7 +26,7 @@
 GLuint axisList;
 
 int AXIS_SIZE= 200;
-int axisEnabled= 1;
+int axisEnabled= 0;
 float rotX, rotY, rotZ;
 float pVeloc, pAcc = 0.09, pPos, pGravPos, pYPos;
 float date;
