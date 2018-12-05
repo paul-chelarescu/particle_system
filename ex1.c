@@ -78,6 +78,14 @@ void updatePositions() {
         particles[i].px += particles[i].speed * particles[i].dx;
         particles[i].py += particles[i].speed * particles[i].dy;
         particles[i].pz += particles[i].speed * particles[i].dz;
+
+
+        if (particles[i].scale >= 5) {
+          particles[i].px = 50.0 * sin(date);
+          particles[i].py = 10.0 + 100;
+          particles[i].pz = 50.0 * cos(date);
+        }
+
         particles[i].age += 1;
     }
 }
@@ -95,7 +103,7 @@ void drawParticle(void) {
 
 void cleanParticles() {
     for (int i = 0; i < particle_count; i++) {
-        if (particles[i].age > 600 || particles[i].speed == 0) {
+        if (particles[i].age > 600 || (particles[i].speed == 0 && particles[i].scale < 5)) {
             particles[i] = particles[particle_count - 1];
             particle_count -= 1;
         }
@@ -176,13 +184,13 @@ void keyboard(unsigned char key, int x, int y) {
           else color_mode = 1;
           break;
         case 'p':
-          particles[particle_count].px = 10.0 * (myRandom() - 0.5);
-          particles[particle_count].py = 10.0 * (myRandom() - 0.5) + 100;
-          particles[particle_count].pz = 10.0 * (myRandom() - 0.5);
+          particles[particle_count].px = 50.0 * sin(date);
+          particles[particle_count].py = 10.0 + 100;
+          particles[particle_count].pz = 50.0 * cos(date);
           // Direction
-          particles[particle_count].dx = (myRandom() - 0.5) * spray_factor;
+          particles[particle_count].dx = /*(myRandom() - 0.5) */ spray_factor * sin(date);
           particles[particle_count].dy = myRandom() * 1.5;
-          particles[particle_count].dz = (myRandom() - 0.5) * spray_factor;
+          particles[particle_count].dz = /*(myRandom() - 0.5) */ spray_factor * cos(date);
 
           particles[particle_count].speed = 5;
           particles[particle_count].scale = 0.5;
@@ -192,6 +200,18 @@ void keyboard(unsigned char key, int x, int y) {
               particles[particle_count].g = myRandom();
               particles[particle_count].b = myRandom();
           }
+          particle_count += 1;
+
+          particles[particle_count].px = 50.0 * sin(date);
+          particles[particle_count].py = 10.0 + 100;
+          particles[particle_count].pz = 50.0 * cos(date);
+          particles[particle_count].speed = 0;
+          particles[particle_count].scale = 5;
+          particles[particle_count].age = 570;
+          particles[particle_count].r = 0;
+          particles[particle_count].g = 0;
+          particles[particle_count].b = 0;
+
           particle_count += 1;
           break;
         case ' ':
