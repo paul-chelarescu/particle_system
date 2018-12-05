@@ -21,13 +21,14 @@
 #define TIME_STEP 0.3
 #define NUM_PARTICLES 10000000
 #define DEG_TO_RAD 0.017453293
+#define PI 3.14159
 
 // Display list for coordinate axis 
 GLuint axisList;
 
 int AXIS_SIZE= 200;
 int axisEnabled= 0;
-float rotX, rotY, rotZ;
+float rotX = 100, rotY, rotZ = 100;
 float pVeloc, pAcc = 0.09, pPos, pGravPos, pYPos;
 float date;
 float gravity = -9.8;
@@ -37,6 +38,7 @@ int start_particle_count = 3000;
 int sources_count = 3;
 int color_mode = 1;
 int mute = 1;
+int view_mode = 1;
 
 typedef struct {
 	double px, py, pz;
@@ -162,9 +164,34 @@ void writeString(void *font, GLclampf r, GLclampf g, GLclampf b,
 void display() {
     frameStart();
     glLoadIdentity();
-    gluLookAt(100.0 + rotX, 100.0 + rotY, 300.0 + rotZ,
-                0.0, 0.0, 0.0,
-                0.0, 1.0, 0.0);
+
+    double xCoord = 0.0001;
+    double zCoord = 0.0001;
+    double hover_speed = date / 50;
+    switch(view_mode) {
+        case 1:
+            gluLookAt(100.0 + rotX, 100.0 + rotY, 300.0 + rotZ,
+                        0.0, 0.0, 0.0,
+                        0.0, 1.0, 0.0);
+            break;
+        case 2:
+            xCoord += cos(3 * hover_speed);
+            zCoord += sin(3 * hover_speed);
+            gluLookAt(rotX * xCoord, 100.0 + rotY, rotZ * zCoord,
+                        0.0, 0.0, 0.0,
+                        0.0, 1.0, 0.0);
+
+            break;
+        case 3:
+            // Lissajous Curve
+            xCoord += 1 * sin(3 * hover_speed + PI / 3);
+            zCoord += 2 * sin(hover_speed);
+            gluLookAt(rotX * xCoord, 100.0 + rotY, rotZ * zCoord,
+                        0.0, 0.0, 0.0,
+                        0.0, 1.0, 0.0);
+
+            break;
+    }
     // Clear the screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // If enabled, draw coordinate axis
@@ -196,6 +223,15 @@ void keyboard(unsigned char key, int x, int y) {
     switch (key) {
         case 27:  /* Escape key */
             exit(0);
+            break;
+        case '1':
+            view_mode = 1;
+            break;
+        case '2':
+            view_mode = 2;
+            break;
+        case '3':
+            view_mode = 3;
             break;
         case 'a':
             if (axisEnabled) axisEnabled = 0;
@@ -230,22 +266,22 @@ void keyboard(unsigned char key, int x, int y) {
             particle_count -= 1;
             break;
         case 'X':
-          rotX -= 100.0;
+          rotX -= 10.0;
           break;
         case 'x':
-          rotX += 100.0;
+          rotX += 10.0;
           break;
         case 'Y':
-          rotY -= 100.0;
+          rotY -= 10.0;
           break;
         case 'y':
-          rotY += 100.0;
+          rotY += 10.0;
           break;
         case 'Z':
-          rotZ -= 100.0;
+          rotZ -= 10.0;
           break;
         case 'z':
-          rotZ += 100.0;
+          rotZ += 10.0;
           break;
         case 'c':
           if (color_mode == 1) color_mode = 0;
@@ -295,7 +331,7 @@ void keyboard(unsigned char key, int x, int y) {
           }
           break;
         case ' ':
-          date = 0.0;
+          //date = 0.0;
           pVeloc = 0.0;
           pPos = 0.0;
           pGravPos = 0.0;
