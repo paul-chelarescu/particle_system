@@ -331,8 +331,7 @@ void keyboard(unsigned char key, int x, int y) {
           spray_factor -= 0.1;
           break;
         case 'c':
-          if (color_mode == 1) color_mode = 0;
-          else color_mode = 1;
+          color_mode = !color_mode;
           break;
         case 'm':
           mute = !mute;
@@ -386,6 +385,10 @@ void keyboard(unsigned char key, int x, int y) {
                   particles[i].r = myRandom();
                   particles[i].g = myRandom();
                   particles[i].b = myRandom();
+              } else {
+                  particles[i].r = 0;
+                  particles[i].g = 0;
+                  particles[i].b = 0;
               }
           }
           break;
@@ -444,6 +447,10 @@ void initParticles() {
             particles[i].r = myRandom();
             particles[i].g = myRandom();
             particles[i].b = myRandom();
+        } else {
+            particles[i].r = 0;
+            particles[i].g = 0;
+            particles[i].b = 0;
         }
     }
 }
