@@ -41,6 +41,7 @@ int mute = 1;
 int view_mode = 1;
 double wind = 0;
 int always_spray = 0;
+int max_age = 600;
 
 typedef struct {
 	double px, py, pz;
@@ -151,7 +152,7 @@ void drawParticle(void) {
 
 void cleanParticles() {
     for (int i = 0; i < particle_count; i++) {
-        if (particles[i].age > 600 || (particles[i].speed == 0 && particles[i].scale < 5)
+        if (particles[i].age > max_age || (particles[i].speed == 0 && particles[i].scale < 5)
                 || particles[i].py < - 1000 || abs(particles[i].px) > 10000 || abs(particles[i].pz) > 10000) {
             particles[i] = particles[particle_count - 1];
             particle_count -= 1;
@@ -360,6 +361,12 @@ void keyboard(unsigned char key, int x, int y) {
         case 13:
           always_spray = !always_spray;
           break;
+        case 'f':
+          max_age += 10;
+          break;
+        case 'F':
+          max_age -= 10;
+          break;
         case ' ':
           //date = 0.0;
           pVeloc = 0.0;
@@ -368,6 +375,7 @@ void keyboard(unsigned char key, int x, int y) {
           pYPos = 0.0;
           wind = 0.0;
           gravity = 0.05;
+          max_age = 600;
           particle_count = start_particle_count;
           for (int i = 0; i < start_particle_count; i++) {
               particles[i].px = 10.0 * (myRandom() - 0.5);
