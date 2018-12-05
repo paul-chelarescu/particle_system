@@ -228,7 +228,7 @@ void display() {
             // Lissajous Curve
             xCoord += 1 * sin(3 * hover_speed + PI / 3);
             zCoord += 2 * sin(hover_speed);
-            gluLookAt(rotX * xCoord, 100.0 + rotY * sin(hover_speed), rotZ * zCoord,
+            gluLookAt(rotX * xCoord, abs(100.0 + rotY * sin(hover_speed)), rotZ * zCoord,
                         0.0, 100.0 + 50 * sin(hover_speed), 0.0,
                         0.0, 1.0, 0.0);
 
