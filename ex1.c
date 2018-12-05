@@ -39,6 +39,7 @@ int sources_count = 3;
 int color_mode = 1;
 int mute = 1;
 int view_mode = 1;
+double wind = 0;
 
 typedef struct {
 	double px, py, pz;
@@ -80,6 +81,7 @@ void updatePositions() {
             if (!mute) system("aplay sound.wav&"); // from http://soundbible.com/1742-Anvil-Impact-1x.html
         }
         if (abs(particles[i].py) > particles[i].scale) particles[i].dy -= 0.05;
+        particles[i].dx -= wind;
 
 
         particles[i].px += particles[i].speed * particles[i].dx;
@@ -112,7 +114,7 @@ void drawParticle(void) {
 void cleanParticles() {
     for (int i = 0; i < particle_count; i++) {
         if (particles[i].age > 600 || (particles[i].speed == 0 && particles[i].scale < 5)
-                || particles[i].py < - 1000) {
+                || particles[i].py < - 1000 || abs(particles[i].px) > 3000 || abs(particles[i].pz) > 3000) {
             particles[i] = particles[particle_count - 1];
             particle_count -= 1;
         }
@@ -171,8 +173,8 @@ void display() {
     double hover_speed = date / 50;
     switch(view_mode) {
         case 1:
-            gluLookAt(100.0 + rotX, 100.0 + rotY, 300.0 + rotZ,
-                        0.0, 0.0, 0.0,
+            gluLookAt(100.0 + rotX, 60.0 + rotY, 300.0 + rotZ,
+                        0.0, 80.0, 0.0,
                         0.0, 1.0, 0.0);
             break;
         case 2:
@@ -291,11 +293,17 @@ void keyboard(unsigned char key, int x, int y) {
         case 'm':
           mute = !mute;
           break;
-        case 'w':
+        case 'r':
           start_particle_count += 1000;
           break;
-        case 'W':
+        case 'R':
           start_particle_count -= 1000;
+          break;
+        case 'w':
+          wind += 0.01;
+          break;
+        case 'W':
+          wind -= 0.01;
           break;
         case 'p':
           for (int a = 1; a <= sources_count; a++) {
@@ -337,6 +345,7 @@ void keyboard(unsigned char key, int x, int y) {
           pPos = 0.0;
           pGravPos = 0.0;
           pYPos = 0.0;
+          wind = 0.0;
           particle_count = start_particle_count;
           for (int i = 0; i < start_particle_count; i++) {
               particles[i].px = 10.0 * (myRandom() - 0.5);
