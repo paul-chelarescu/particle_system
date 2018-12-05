@@ -16,6 +16,10 @@
 #include <time.h>
 #include <math.h>
 #include <GL/glut.h>
+#include "frames.h"
+
+#define TIME_STEP 0.3
+#define NUM_PARTICLES 10000000
 
 // Display list for coordinate axis 
 GLuint axisList;
@@ -23,6 +27,22 @@ GLuint axisList;
 int AXIS_SIZE= 200;
 int axisEnabled= 1;
 float rotX, rotY, rotZ;
+float pVeloc, pAcc = 0.09, pPos, pGravPos, pYPos;
+float date;
+float gravity = -9.8;
+double spray_factor = 0.7;
+int particle_count = 3000;
+int color_mode = 1;
+
+typedef struct {
+	double px, py, pz;
+	double dx, dy, dz;
+	double speed, size, scale;
+	// double rx, ry, rz, ra;
+	double r, g, b;
+	int age;
+} particle;
+particle particles[NUM_PARTICLES];
 
 ///////////////////////////////////////////////
 
@@ -33,21 +53,51 @@ double myRandom()
 }
 
 ///////////////////////////////////////////////
+void updatePositions() {
+    for (int i = 0; i < particle_count; i++) {
+        if (particles[i].py > 0 && particles[i].py < particles[i].scale) {
+            particles[i].dx *= 0.95;
+            particles[i].dy *= -0.95;
+            particles[i].dz *= 0.95;
+            if (particles[i].dx < 0.005 && particles[i].dy < 0.005 && particles[i].dz < 0.005) {
+                particles[i].speed = 0;
+            }
+        } else if (particles[i].py <= 0) {
+            particles[i].py = 0;
+            particles[i].dy *= -0.7;
+        }
+        if (abs(particles[i].py) > particles[i].scale) particles[i].dy -= 0.05;
+
+
+        particles[i].px += particles[i].speed * particles[i].dx;
+        particles[i].py += particles[i].speed * particles[i].dy;
+        particles[i].pz += particles[i].speed * particles[i].dz;
+        particles[i].age += 1;
+    }
+}
+
 void drawParticle(void) {
     glPointSize(20.0f);
     glBegin(GL_POINTS);
-        glColor3f(1.0, 0.0, 0.0);
-        glVertex3f (0.0, 60.0, 40.0);
-        glVertex3f (0.0, 80.0, 0.0);
-        glVertex3f (80.0, 60.0, 0.0);
-        glVertex3f (80.0, 30.0, 0.0);
-        glVertex3f (60.0, 0.0, 50.0);
-        glVertex3f (20.0, 0.0, 50.0);
+        for (int i = 0; i < particle_count; i++) {
+            glColor3f(particles[i].r, particles[i].g, particles[i].b);
+            glVertex3f (particles[i].px, particles[i].py, particles[i].pz);
+        }
     glEnd ();
+    updatePositions();
 }
 
+void cleanParticles() {
+    for (int i = 0; i < particle_count; i++) {
+        if (particles[i].age > 200) {
+            particles[i] = particles[particle_count - 1];
+            particle_count -= 1;
+        }
+    }
+}
 
 void display() {
+    frameStart();
     glLoadIdentity();
     gluLookAt(100.0 + rotX, 100.0 + rotY, 300.0 + rotZ,
                 0.0, 0.0, 0.0,
@@ -58,6 +108,9 @@ void display() {
     if(axisEnabled) glCallList(axisList);
     drawParticle();
 
+    cleanParticles();
+
+    frameEnd(GLUT_BITMAP_HELVETICA_10, 1.0, 0.0, 0.0, 0.003, 0.99);
     glutSwapBuffers();
 }
 
@@ -85,6 +138,55 @@ void keyboard(unsigned char key, int x, int y) {
           break;
         case 'z':
           rotZ += 100.0;
+          break;
+        case 'c':
+          if (color_mode == 1) color_mode = 0;
+          else color_mode = 1;
+          break;
+        case 'p':
+          particles[particle_count].px = 10.0 * (myRandom() - 0.5);
+          particles[particle_count].py = 10.0 * (myRandom() - 0.5) + 100;
+          particles[particle_count].pz = 10.0 * (myRandom() - 0.5);
+          // Direction
+          particles[particle_count].dx = (myRandom() - 0.5) * spray_factor;
+          particles[particle_count].dy = myRandom() * 1.5;
+          particles[particle_count].dz = (myRandom() - 0.5) * spray_factor;
+
+          particles[particle_count].speed = 5;
+          particles[particle_count].scale = 0.5;
+          particles[particle_count].age = 0;
+          if (color_mode) {
+              particles[particle_count].r = myRandom();
+              particles[particle_count].g = myRandom();
+              particles[particle_count].b = myRandom();
+          }
+          particle_count += 1;
+          break;
+        case ' ':
+          date = 0.0;
+          pVeloc = 0.0;
+          pPos = 0.0;
+          pGravPos = 0.0;
+          pYPos = 0.0;
+          particle_count = 3000;
+          for (int i = 0; i < particle_count; i++) {
+              particles[i].px = 10.0 * (myRandom() - 0.5);
+              particles[i].py = 10.0 * (myRandom() - 0.5) + 100;
+              particles[i].pz = 10.0 * (myRandom() - 0.5);
+
+              particles[i].dx = (myRandom() - 0.5) * spray_factor;
+              particles[i].dy = myRandom();
+              particles[i].dz = (myRandom() - 0.5) * spray_factor;
+
+              particles[i].speed = 5;
+              particles[i].scale = 0.5;
+              particles[i].age = 0;
+              if (color_mode) {
+                  particles[i].r = myRandom();
+                  particles[i].g = myRandom();
+                  particles[i].b = myRandom();
+              }
+          }
           break;
     }
     glutPostRedisplay();
@@ -123,6 +225,27 @@ void makeAxes() {
   glEndList();
 }
 
+void initParticles() {
+    for (int i = 0; i < particle_count; i++) {
+        // Particle position
+        particles[i].px = 10.0 * (myRandom() - 0.5);
+        particles[i].py = 10.0 * (myRandom() - 0.5) + 100;
+        particles[i].pz = 10.0 * (myRandom() - 0.5);
+        // Direction
+        particles[i].dx = (myRandom() - 0.5) * spray_factor;
+        particles[i].dy = myRandom();
+        particles[i].dz = (myRandom() - 0.5) * spray_factor;
+
+        particles[i].speed = 5;
+        particles[i].scale = 0.5;
+        if (color_mode) {
+            particles[i].r = myRandom();
+            particles[i].g = myRandom();
+            particles[i].b = myRandom();
+        }
+    }
+}
+
 ///////////////////////////////////////////////
 void initGraphics(int argc, char *argv[])
 {
@@ -135,16 +258,27 @@ void initGraphics(int argc, char *argv[])
   glutKeyboardFunc(keyboard);
   glutReshapeFunc(reshape);
   makeAxes();
+  initParticles();
 }
 
 /////////////////////////////////////////////////
+void animate(void) {
+    date += TIME_STEP;
+    pVeloc += pAcc;
+    pPos += pVeloc;
+    pGravPos += gravity * date / 40;
+    pYPos += pVeloc / 90;
+    glutPostRedisplay();
+}
 
 int main(int argc, char *argv[]) {
     // double f;
     srand(time(NULL));
     initGraphics(argc, argv);
+    glutFullScreen();
     glEnable(GL_POINT_SMOOTH);
     glutDisplayFunc (display);
+    glutIdleFunc (animate);
     glutMainLoop();
     return 0;
 }
