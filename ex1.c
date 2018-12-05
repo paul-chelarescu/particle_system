@@ -31,7 +31,7 @@ int axisEnabled= 0;
 float rotX = 100, rotY, rotZ = 100;
 float pVeloc, pAcc = 0.09, pPos, pGravPos, pYPos;
 float date;
-float gravity = -9.8;
+float gravity = 0.05;
 double spray_factor = 0.7;
 int particle_count = 3000;
 int start_particle_count = 3000;
@@ -81,7 +81,7 @@ void updatePositions() {
             particles[i].dy *= -0.7;
             if (!mute) system("aplay sound.wav&"); // from http://soundbible.com/1742-Anvil-Impact-1x.html
         }
-        if (abs(particles[i].py) > particles[i].scale) particles[i].dy -= 0.05;
+        if (abs(particles[i].py) > particles[i].scale) particles[i].dy -= gravity;
         particles[i].dx -= wind;
 
 
@@ -352,6 +352,12 @@ void keyboard(unsigned char key, int x, int y) {
         case 'p':
           spray_particles();
           break;
+        case 'g':
+          gravity += 0.01;
+          break;
+        case 'G':
+          gravity -= 0.01;
+          break;
         case 13:
           always_spray = !always_spray;
           break;
@@ -362,6 +368,7 @@ void keyboard(unsigned char key, int x, int y) {
           pGravPos = 0.0;
           pYPos = 0.0;
           wind = 0.0;
+          gravity = 0.05;
           particle_count = start_particle_count;
           for (int i = 0; i < start_particle_count; i++) {
               particles[i].px = 10.0 * (myRandom() - 0.5);
@@ -462,7 +469,6 @@ void animate(void) {
     date += TIME_STEP;
     pVeloc += pAcc;
     pPos += pVeloc;
-    pGravPos += gravity * date / 40;
     pYPos += pVeloc / 90;
     glutPostRedisplay();
 }
