@@ -40,6 +40,7 @@ int color_mode = 1;
 int mute = 1;
 int view_mode = 1;
 double wind = 0;
+int always_spray = 0;
 
 typedef struct {
 	double px, py, pz;
@@ -100,6 +101,42 @@ void updatePositions() {
     }
 }
 
+void spray_particles() {
+      for (int a = 1; a <= sources_count; a++) {
+        double current_position = 360.0 / (double) sources_count * a;
+        particles[particle_count].px = 50.0 * sin((date / 2) + current_position * DEG_TO_RAD);
+        particles[particle_count].py = 10.0 + 100;
+        particles[particle_count].pz = 50.0 * cos((date / 2) + current_position * DEG_TO_RAD);
+        // Direction
+        particles[particle_count].dx = /*(myRandom() - 0.5) */ spray_factor * sin(date / 2 + current_position * DEG_TO_RAD);
+        particles[particle_count].dy = myRandom() * 1.5;
+        particles[particle_count].dz = /*(myRandom() - 0.5) */ spray_factor * cos(date / 2 + current_position * DEG_TO_RAD);
+
+        particles[particle_count].speed = 5;
+        particles[particle_count].scale = 0.5;
+        particles[particle_count].age = 50 * myRandom();
+        if (color_mode) {
+            particles[particle_count].r = myRandom();
+            particles[particle_count].g = myRandom();
+            particles[particle_count].b = myRandom();
+        }
+        particle_count += 1;
+
+        particles[particle_count].px = 50.0 * sin((date / 2) + current_position * DEG_TO_RAD);
+        particles[particle_count].py = 10.0 + 100;
+        particles[particle_count].pz = 50.0 * cos((date / 2) + current_position * DEG_TO_RAD);
+        particles[particle_count].speed = 0;
+        particles[particle_count].scale = 5 * a;
+        particles[particle_count].age = 300;
+        particles[particle_count].r = 0;
+        particles[particle_count].g = 0;
+        particles[particle_count].b = 0;
+
+        particle_count += 1;
+      }
+}
+
+
 void drawParticle(void) {
     glPointSize(20.0f);
     glBegin(GL_POINTS);
@@ -109,12 +146,13 @@ void drawParticle(void) {
         }
     glEnd ();
     updatePositions();
+    if (always_spray) spray_particles();
 }
 
 void cleanParticles() {
     for (int i = 0; i < particle_count; i++) {
         if (particles[i].age > 600 || (particles[i].speed == 0 && particles[i].scale < 5)
-                || particles[i].py < - 1000 || abs(particles[i].px) > 3000 || abs(particles[i].pz) > 3000) {
+                || particles[i].py < - 1000 || abs(particles[i].px) > 10000 || abs(particles[i].pz) > 10000) {
             particles[i] = particles[particle_count - 1];
             particle_count -= 1;
         }
@@ -312,38 +350,10 @@ void keyboard(unsigned char key, int x, int y) {
           wind -= 0.01;
           break;
         case 'p':
-          for (int a = 1; a <= sources_count; a++) {
-            double current_position = 360.0 / (double) sources_count * a;
-            particles[particle_count].px = 50.0 * sin((date / 2) + current_position * DEG_TO_RAD);
-            particles[particle_count].py = 10.0 + 100;
-            particles[particle_count].pz = 50.0 * cos((date / 2) + current_position * DEG_TO_RAD);
-            // Direction
-            particles[particle_count].dx = /*(myRandom() - 0.5) */ spray_factor * sin(date / 2 + current_position * DEG_TO_RAD);
-            particles[particle_count].dy = myRandom() * 1.5;
-            particles[particle_count].dz = /*(myRandom() - 0.5) */ spray_factor * cos(date / 2 + current_position * DEG_TO_RAD);
-
-            particles[particle_count].speed = 5;
-            particles[particle_count].scale = 0.5;
-            particles[particle_count].age = 50 * myRandom();
-            if (color_mode) {
-                particles[particle_count].r = myRandom();
-                particles[particle_count].g = myRandom();
-                particles[particle_count].b = myRandom();
-            }
-            particle_count += 1;
-
-            particles[particle_count].px = 50.0 * sin((date / 2) + current_position * DEG_TO_RAD);
-            particles[particle_count].py = 10.0 + 100;
-            particles[particle_count].pz = 50.0 * cos((date / 2) + current_position * DEG_TO_RAD);
-            particles[particle_count].speed = 0;
-            particles[particle_count].scale = 5 * a;
-            particles[particle_count].age = 300;
-            particles[particle_count].r = 0;
-            particles[particle_count].g = 0;
-            particles[particle_count].b = 0;
-
-            particle_count += 1;
-          }
+          spray_particles();
+          break;
+        case 13:
+          always_spray = !always_spray;
           break;
         case ' ':
           //date = 0.0;
