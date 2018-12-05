@@ -33,6 +33,7 @@ float date;
 float gravity = -9.8;
 double spray_factor = 0.7;
 int particle_count = 3000;
+int start_particle_count = 3000;
 int sources_count = 3;
 int color_mode = 1;
 
@@ -129,6 +130,33 @@ void drawGround() {
 	glEnd();
 }
 
+void writeString(void *font, GLclampf r, GLclampf g, GLclampf b,
+              GLfloat x, GLfloat y, char* str) {
+  char *ch;
+  GLint matrixMode;
+
+ glGetIntegerv(GL_MATRIX_MODE, &matrixMode);
+
+ glMatrixMode(GL_PROJECTION);
+ glPushMatrix();
+   glLoadIdentity();
+   gluOrtho2D(0.0, 1.0, 0.0, 1.0);
+   glMatrixMode(GL_MODELVIEW);
+   glPushMatrix();
+     glLoadIdentity();
+     glPushAttrib(GL_COLOR_BUFFER_BIT);
+       glColor3f(r, g, b);
+       glRasterPos3f(x, y, 0.0);
+       for(ch= str; *ch; ch++) {
+          glutBitmapCharacter(font, (int)*ch);
+       }
+     glPopAttrib();
+   glPopMatrix();
+   glMatrixMode(GL_PROJECTION);
+ glPopMatrix();
+ glMatrixMode(matrixMode);
+}
+
 void display() {
     frameStart();
     glLoadIdentity();
@@ -150,6 +178,13 @@ void display() {
     cleanParticles();
 
     frameEnd(GLUT_BITMAP_HELVETICA_10, 1.0, 0.0, 0.0, 0.003, 0.99);
+    char text[30];
+    sprintf(text, "Particles: %d", particle_count);
+    writeString(GLUT_BITMAP_HELVETICA_10, 1.0, 0.0, 0.0, 0.003, 0.98, text);
+    sprintf(text, "Explosion particles: %d", start_particle_count);
+    writeString(GLUT_BITMAP_HELVETICA_10, 1.0, 0.0, 0.0, 0.003, 0.97, text);
+    sprintf(text, "Sources: %d", sources_count);
+    writeString(GLUT_BITMAP_HELVETICA_10, 1.0, 0.0, 0.0, 0.003, 0.96, text);
     glutSwapBuffers();
 }
 
@@ -214,6 +249,12 @@ void keyboard(unsigned char key, int x, int y) {
           if (color_mode == 1) color_mode = 0;
           else color_mode = 1;
           break;
+        case 'w':
+          start_particle_count += 1000;
+          break;
+        case 'W':
+          start_particle_count -= 1000;
+          break;
         case 'p':
           for (int a = 1; a <= sources_count; a++) {
             double current_position = 360.0 / (double) sources_count * a;
@@ -254,8 +295,8 @@ void keyboard(unsigned char key, int x, int y) {
           pPos = 0.0;
           pGravPos = 0.0;
           pYPos = 0.0;
-          particle_count = 3000;
-          for (int i = 0; i < particle_count; i++) {
+          particle_count = start_particle_count;
+          for (int i = 0; i < start_particle_count; i++) {
               particles[i].px = 10.0 * (myRandom() - 0.5);
               particles[i].py = 10.0 * (myRandom() - 0.5) + 100;
               particles[i].pz = 10.0 * (myRandom() - 0.5);
