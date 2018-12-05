@@ -286,6 +286,12 @@ void keyboard(unsigned char key, int x, int y) {
         case 'z':
           rotZ += 10.0;
           break;
+        case 't':
+          spray_factor += 0.1;
+          break;
+        case 'T':
+          spray_factor -= 0.1;
+          break;
         case 'c':
           if (color_mode == 1) color_mode = 0;
           else color_mode = 1;
