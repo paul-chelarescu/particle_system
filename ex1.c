@@ -42,6 +42,7 @@ int view_mode = 1;
 double wind = 0;
 int always_spray = 0;
 int max_age = 600;
+int particle_speed = 5;
 
 typedef struct {
 	double px, py, pz;
@@ -113,7 +114,7 @@ void spray_particles() {
         particles[particle_count].dy = myRandom() * 1.5;
         particles[particle_count].dz = /*(myRandom() - 0.5) */ spray_factor * cos(date / 2 + current_position * DEG_TO_RAD);
 
-        particles[particle_count].speed = 5;
+        particles[particle_count].speed = particle_speed;
         particles[particle_count].scale = 0.5;
         particles[particle_count].age = 50 * myRandom();
         if (color_mode) {
@@ -279,6 +280,12 @@ void keyboard(unsigned char key, int x, int y) {
             if (axisEnabled) axisEnabled = 0;
             else axisEnabled = 1;
             break;
+        case 'v':
+            particle_speed += 1;
+            break;
+        case 'V':
+            particle_speed -= 1;
+            break;
         case 's':
             sources_count += 1;
             particles[particle_count].px = 50.0 * sin((date / 2) +  DEG_TO_RAD);
@@ -386,7 +393,7 @@ void keyboard(unsigned char key, int x, int y) {
               particles[i].dy = myRandom();
               particles[i].dz = (myRandom() - 0.5) * spray_factor;
 
-              particles[i].speed = 5;
+              particles[i].speed = particle_speed;
               particles[i].scale = 0.5;
               particles[i].age = 50 * myRandom();
               if (color_mode) {
@@ -448,7 +455,7 @@ void initParticles() {
         particles[i].dy = myRandom();
         particles[i].dz = (myRandom() - 0.5) * spray_factor;
 
-        particles[i].speed = 5;
+        particles[i].speed = particle_speed;
         particles[i].scale = 0.5;
         particles[i].age = 50 * myRandom();
         if (color_mode) {
