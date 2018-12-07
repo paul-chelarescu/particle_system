@@ -15,8 +15,10 @@
 #include <stdio.h>
 #include <time.h>
 #include <math.h>
+#include <string.h>
 #include <GL/glut.h>
 #include "frames.h"
+
 
 #define TIME_STEP 0.3
 #define NUM_PARTICLES 10000000
@@ -39,7 +41,7 @@ int sources_count = 3;
 int color_mode = 1;
 int mute = 1;
 int view_mode = 1;
-double wind = 0;
+float wind = 0;
 int always_spray = 0;
 int max_age = 600;
 int particle_speed = 5;
@@ -495,8 +497,24 @@ void animate(void) {
     glutPostRedisplay();
 }
 
+void parseArgs(int argc, char *argv[]) {
+    if (argc < 2) return;
+    if (strcmp(argv[1], "h") == 0) {
+        printf("Usage: ./ex1 particle_count particle_speed max_age gravity wind color_mode spray_factor\n");
+        exit(0);
+    } else {
+        particle_count = start_particle_count = atoi(argv[1]);
+        particle_speed = atoi(argv[2]);
+        max_age = atoi(argv[3]);
+        gravity = atof(argv[4]);
+        wind = atof(argv[5]);
+        color_mode = atoi(argv[6]);
+        spray_factor = atof(argv[7]);
+    }
+}
+
 int main(int argc, char *argv[]) {
-    // double f;
+    parseArgs(argc, argv);
     srand(time(NULL));
     initGraphics(argc, argv);
     glutFullScreen();
