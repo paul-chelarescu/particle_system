@@ -44,7 +44,7 @@ int view_mode = 1;
 float wind = 0;
 int always_spray = 0;
 int max_age = 600;
-int particle_speed = 5;
+double particle_speed = 5;
 int cube_pos[][4] = {{ 6, 5, 4, 7 }, { 0, 3, 2, 1 }, { 2, 6, 7, 3 },  {3 ,0, 4, 7}, { 0, 1, 5, 4}, { 5, 6, 2, 1}};
 double scale = 3.0;
 int points_mode = 0;
@@ -438,7 +438,7 @@ void keyboard(unsigned char key, int x, int y) {
               particles[i].dy = myRandom();
               particles[i].dz = (myRandom() - 0.5) * spray_factor;
 
-              particles[i].speed = particle_speed;
+              particles[i].speed = particle_speed + myRandom() * particle_speed / 2;
               particles[i].scale = scale;
               particles[i].age = 50 * myRandom();
               if (color_mode) {
@@ -500,7 +500,7 @@ void initParticles() {
         particles[i].dy = myRandom();
         particles[i].dz = (myRandom() - 0.5) * spray_factor;
 
-        particles[i].speed = particle_speed;
+        particles[i].speed = particle_speed + myRandom() * particle_speed / 2;
         particles[i].scale = scale;
         particles[i].age = 50 * myRandom();
         if (color_mode) {
