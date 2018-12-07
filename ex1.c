@@ -53,7 +53,6 @@ typedef struct {
 	double px, py, pz;
 	double dx, dy, dz;
 	double speed, scale;
-	// double rx, ry, rz, ra;
 	double r, g, b;
 	int age;
 } particle;
@@ -544,7 +543,7 @@ void animate(void) {
 void parseArgs(int argc, char *argv[]) {
     if (argc < 2) return;
     if (strcmp(argv[1], "h") == 0) {
-        printf("Usage: ./ex1 particle_count particle_speed max_age gravity wind color_mode spray_factor\n");
+        printf("Usage: ./ex1 particle_count particle_speed max_age gravity wind color_mode spray_factor scale points_mode\n");
         exit(0);
     } else {
         particle_count = start_particle_count = atoi(argv[1]);
@@ -554,6 +553,8 @@ void parseArgs(int argc, char *argv[]) {
         wind = atof(argv[5]);
         color_mode = atoi(argv[6]);
         spray_factor = atof(argv[7]);
+        scale = atof(argv[8]);
+        points_mode = atoi(argv[9]);
     }
 }
 
