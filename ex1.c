@@ -45,6 +45,9 @@ float wind = 0;
 int always_spray = 0;
 int max_age = 600;
 int particle_speed = 5;
+int cube_pos[][4] = {{ 6, 5, 4, 7 }, { 0, 3, 2, 1 }, { 2, 6, 7, 3 },  {3 ,0, 4, 7}, { 0, 1, 5, 4}, { 5, 6, 2, 1}};
+double scale = 3.0;
+int points_mode = 0;
 
 typedef struct {
 	double px, py, pz;
@@ -117,7 +120,7 @@ void spray_particles() {
         particles[particle_count].dz = /*(myRandom() - 0.5) */ spray_factor * cos(date / 2 + current_position * DEG_TO_RAD);
 
         particles[particle_count].speed = particle_speed;
-        particles[particle_count].scale = 0.5;
+        particles[particle_count].scale = scale;
         particles[particle_count].age = 50 * myRandom();
         if (color_mode) {
             particles[particle_count].r = myRandom();
@@ -142,13 +145,43 @@ void spray_particles() {
 
 
 void drawParticle(void) {
-    glPointSize(20.0f);
-    glBegin(GL_POINTS);
+    glPointSize(scale * 5);
+    if (points_mode) {
+        glBegin(GL_POINTS);
         for (int i = 0; i < particle_count; i++) {
             glColor3f(particles[i].r, particles[i].g, particles[i].b);
             glVertex3f (particles[i].px, particles[i].py, particles[i].pz);
         }
-    glEnd ();
+        glEnd ();
+    } else {
+        for (int i = 0; i < particle_count; i++) {
+            glColor3f(particles[i].r, particles[i].g, particles[i].b);
+
+            double current_scale = particles[i].scale;
+            if (particles[i].scale == 0) continue;
+            if (particles[i].scale > 5) current_scale = 5;
+
+            float cube[][3] = {
+            {particles[i].px + current_scale, particles[i].py + current_scale, particles[i].pz + current_scale},
+            {particles[i].px + current_scale, particles[i].py - current_scale, particles[i].pz + current_scale},
+            {particles[i].px - current_scale, particles[i].py - current_scale, particles[i].pz + current_scale},
+            {particles[i].px - current_scale, particles[i].py + current_scale, particles[i].pz + current_scale},
+            {particles[i].px + current_scale, particles[i].py + current_scale, particles[i].pz - current_scale},
+            {particles[i].px + current_scale, particles[i].py - current_scale, particles[i].pz - current_scale},
+            {particles[i].px - current_scale, particles[i].py - current_scale, particles[i].pz - current_scale},
+            {particles[i].px - current_scale, particles[i].py + current_scale, particles[i].pz - current_scale}
+            };
+
+            for (int a = 0; a < 6; a++) {
+                glBegin(GL_QUADS);
+                glVertex3fv(cube[cube_pos[a][0]]);
+                glVertex3fv(cube[cube_pos[a][1]]);
+                glVertex3fv(cube[cube_pos[a][2]]);
+                glVertex3fv(cube[cube_pos[a][3]]);
+                glEnd();
+            }
+        }
+    }
     updatePositions();
     if (always_spray) spray_particles();
 }
@@ -303,6 +336,7 @@ void keyboard(unsigned char key, int x, int y) {
             particle_count += 1;
             break;
         case 'S':
+            if (sources_count <= 0) break;
             sources_count -= 1;
             particles[particle_count].px = 50.0 * sin((date / 2) +  DEG_TO_RAD);
             particles[particle_count].py = 10.0 + 100;
@@ -351,6 +385,7 @@ void keyboard(unsigned char key, int x, int y) {
           break;
         case 'R':
           start_particle_count -= 1000;
+          if (start_particle_count <= 0) start_particle_count = 0;
           break;
         case 'w':
           wind += 0.01;
@@ -376,6 +411,15 @@ void keyboard(unsigned char key, int x, int y) {
         case 'F':
           max_age -= 10;
           break;
+        case '=':
+          points_mode = !points_mode;
+          break;
+        case 'u':
+          if (scale < 4.5)scale += 0.5;
+          break;
+        case 'U':
+          if (scale >= 0.5) scale -= 0.5;
+          break;
         case ' ':
           //date = 0.0;
           pVeloc = 0.0;
@@ -396,7 +440,7 @@ void keyboard(unsigned char key, int x, int y) {
               particles[i].dz = (myRandom() - 0.5) * spray_factor;
 
               particles[i].speed = particle_speed;
-              particles[i].scale = 0.5;
+              particles[i].scale = scale;
               particles[i].age = 50 * myRandom();
               if (color_mode) {
                   particles[i].r = myRandom();
@@ -458,7 +502,7 @@ void initParticles() {
         particles[i].dz = (myRandom() - 0.5) * spray_factor;
 
         particles[i].speed = particle_speed;
-        particles[i].scale = 0.5;
+        particles[i].scale = scale;
         particles[i].age = 50 * myRandom();
         if (color_mode) {
             particles[i].r = myRandom();
