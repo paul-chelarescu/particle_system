@@ -52,7 +52,7 @@ int points_mode = 0;
 typedef struct {
 	double px, py, pz;
 	double dx, dy, dz;
-	double speed, size, scale;
+	double speed, scale;
 	// double rx, ry, rz, ra;
 	double r, g, b;
 	int age;
